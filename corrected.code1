@@ -1,0 +1,182 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+// structure
+struct clientData
+{
+    int acctNum;
+    char firstName[20];
+    char lastName[20];
+    double balance;
+};
+
+// function prototypes
+void initializeFile(FILE *fp);
+void displayAll(FILE *fp);
+void addAccount(FILE *fp);
+void updateAccount(FILE *fp);
+void deleteAccount(FILE *fp);
+
+int main()
+{
+    FILE *fp;
+    int choice;
+
+    // open file (create if not exists)
+    fp = fopen("bank.dat", "rb+");
+    if (fp == NULL)
+    {
+        fp = fopen("bank.dat", "wb+");
+        if (fp == NULL)
+        {
+            printf("File cannot be created!\n");
+            exit(1);
+        }
+        initializeFile(fp);
+    }
+
+    while (1)
+    {
+        printf("\n===== BANK SYSTEM =====\n");
+        printf("1. Display Accounts\n");
+        printf("2. Add Account\n");
+        printf("3. Update Account\n");
+        printf("4. Delete Account\n");
+        printf("5. Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+
+        switch (choice)
+        {
+        case 1:
+            displayAll(fp);
+            break;
+        case 2:
+            addAccount(fp);
+            break;
+        case 3:
+            updateAccount(fp);
+            break;
+        case 4:
+            deleteAccount(fp);
+            break;
+        case 5:
+            fclose(fp);
+            exit(0);
+        default:
+            printf("Invalid choice!\n");
+        }
+    }
+}
+
+// initialize file with empty records
+void initializeFile(FILE *fp)
+{
+    struct clientData blank = {0, "", "", 0.0};
+
+    for (int i = 0; i < MAX; i++)
+    {
+        fwrite(&blank, sizeof(struct clientData), 1, fp);
+    }
+}
+
+// display all records
+void displayAll(FILE *fp)
+{
+    struct clientData c;
+    rewind(fp);
+
+    printf("\nAcct\tFirst\tLast\tBalance\n");
+
+    while (fread(&c, sizeof(struct clientData), 1, fp))
+    {
+        if (c.acctNum != 0)
+        {
+            printf("%d\t%s\t%s\t%.2f\n",
+                   c.acctNum, c.firstName, c.lastName, c.balance);
+        }
+    }
+}
+
+// add account
+void addAccount(FILE *fp)
+{
+    struct clientData c;
+    int acc;
+
+    printf("Enter account number (1-100): ");
+    scanf("%d", &acc);
+
+    if (acc < 1 || acc > MAX)
+    {
+        printf("Invalid account number!\n");
+        return;
+    }
+
+    fseek(fp, (acc - 1) * sizeof(struct clientData), SEEK_SET);
+    fread(&c, sizeof(struct clientData), 1, fp);
+
+    if (c.acctNum != 0)
+    {
+        printf("Account already exists!\n");
+        return;
+    }
+
+    printf("Enter first name, last name, balance: ");
+    scanf("%s %s %lf", c.firstName, c.lastName, &c.balance);
+
+    c.acctNum = acc;
+
+    fseek(fp, (acc - 1) * sizeof(struct clientData), SEEK_SET);
+    fwrite(&c, sizeof(struct clientData), 1, fp);
+
+    printf("Account added successfully.\n");
+}
+
+// update account
+void updateAccount(FILE *fp)
+{
+    struct clientData c;
+    int acc;
+    double amount;
+
+    printf("Enter account number: ");
+    scanf("%d", &acc);
+
+    fseek(fp, (acc - 1) * sizeof(struct clientData), SEEK_SET);
+    fread(&c, sizeof(struct clientData), 1, fp);
+
+    if (c.acctNum == 0)
+    {
+        printf("Account not found!\n");
+        return;
+    }
+
+    printf("Current balance: %.2f\n", c.balance);
+    printf("Enter amount (+/-): ");
+    scanf("%lf", &amount);
+
+    c.balance += amount;
+
+    fseek(fp, (acc - 1) * sizeof(struct clientData), SEEK_SET);
+    fwrite(&c, sizeof(struct clientData), 1, fp);
+
+    printf("Updated successfully!\n");
+}
+
+// delete account
+void deleteAccount(FILE *fp)
+{
+    struct clientData blank = {0, "", "", 0.0};
+    int acc;
+
+    printf("Enter account number to delete: ");
+    scanf("%d", &acc);
+
+    fseek(fp, (acc - 1) * sizeof(struct clientData), SEEK_SET);
+    fwrite(&blank, sizeof(struct clientData), 1, fp);
+
+    printf("Account deleted.\n");
+}
