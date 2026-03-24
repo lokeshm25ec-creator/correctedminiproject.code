@@ -3,7 +3,6 @@
 
 #define MAX 100
 
-// structure
 struct clientData
 {
     int acctNum;
@@ -12,20 +11,18 @@ struct clientData
     double balance;
 };
 
-// function prototypes
 void initializeFile(FILE *fp);
 void displayAll(FILE *fp);
 void addAccount(FILE *fp);
 void updateAccount(FILE *fp);
 void deleteAccount(FILE *fp);
-void checkBalance(FILE *fp);   // 🆕 NEW FUNCTION
+void checkBalance(FILE *fp);   
 
 int main()
 {
     FILE *fp;
     int choice;
 
-    // open file (create if not exists)
     fp = fopen("bank.dat", "rb+");
     if (fp == NULL)
     {
@@ -45,8 +42,8 @@ int main()
         printf("2. Add Account\n");
         printf("3. Update Account\n");
         printf("4. Delete Account\n");
-        printf("5. Check Balance\n");   // 🆕 ADDED
-        printf("6. Exit\n");            // shifted
+        printf("5. Check Balance\n");  
+        printf("6. Exit\n");           
         printf("Enter choice: ");
         scanf("%d", &choice);
 
@@ -65,7 +62,7 @@ int main()
             deleteAccount(fp);
             break;
         case 5:
-            checkBalance(fp);   // 🆕 CALL
+            checkBalance(fp);  
             break;
         case 6:
             fclose(fp);
@@ -76,7 +73,6 @@ int main()
     }
 }
 
-// initialize file
 void initializeFile(FILE *fp)
 {
     struct clientData blank = {0, "", "", 0.0};
@@ -87,7 +83,6 @@ void initializeFile(FILE *fp)
     }
 }
 
-// display all
 void displayAll(FILE *fp)
 {
     struct clientData c;
@@ -105,7 +100,6 @@ void displayAll(FILE *fp)
     }
 }
 
-// add account
 void addAccount(FILE *fp)
 {
     struct clientData c;
@@ -140,7 +134,6 @@ void addAccount(FILE *fp)
     printf("Account added successfully.\n");
 }
 
-// update account
 void updateAccount(FILE *fp)
 {
     struct clientData c;
@@ -171,7 +164,6 @@ void updateAccount(FILE *fp)
     printf("Updated successfully!\n");
 }
 
-// delete account
 void deleteAccount(FILE *fp)
 {
     struct clientData blank = {0, "", "", 0.0};
@@ -186,7 +178,6 @@ void deleteAccount(FILE *fp)
     printf("Account deleted.\n");
 }
 
-// 🆕 CHECK BALANCE FUNCTION
 void checkBalance(FILE *fp)
 {
     struct clientData c;
