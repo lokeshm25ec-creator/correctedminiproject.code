@@ -18,6 +18,7 @@ void displayAll(FILE *fp);
 void addAccount(FILE *fp);
 void updateAccount(FILE *fp);
 void deleteAccount(FILE *fp);
+void checkBalance(FILE *fp);   // 🆕 NEW FUNCTION
 
 int main()
 {
@@ -44,7 +45,8 @@ int main()
         printf("2. Add Account\n");
         printf("3. Update Account\n");
         printf("4. Delete Account\n");
-        printf("5. Exit\n");
+        printf("5. Check Balance\n");   // 🆕 ADDED
+        printf("6. Exit\n");            // shifted
         printf("Enter choice: ");
         scanf("%d", &choice);
 
@@ -63,6 +65,9 @@ int main()
             deleteAccount(fp);
             break;
         case 5:
+            checkBalance(fp);   // 🆕 CALL
+            break;
+        case 6:
             fclose(fp);
             exit(0);
         default:
@@ -71,7 +76,7 @@ int main()
     }
 }
 
-// initialize file with empty records
+// initialize file
 void initializeFile(FILE *fp)
 {
     struct clientData blank = {0, "", "", 0.0};
@@ -82,7 +87,7 @@ void initializeFile(FILE *fp)
     }
 }
 
-// display all records
+// display all
 void displayAll(FILE *fp)
 {
     struct clientData c;
@@ -179,4 +184,34 @@ void deleteAccount(FILE *fp)
     fwrite(&blank, sizeof(struct clientData), 1, fp);
 
     printf("Account deleted.\n");
+}
+
+// 🆕 CHECK BALANCE FUNCTION
+void checkBalance(FILE *fp)
+{
+    struct clientData c;
+    int acc;
+
+    printf("Enter account number: ");
+    scanf("%d", &acc);
+
+    if (acc < 1 || acc > MAX)
+    {
+        printf("Invalid account number!\n");
+        return;
+    }
+
+    fseek(fp, (acc - 1) * sizeof(struct clientData), SEEK_SET);
+    fread(&c, sizeof(struct clientData), 1, fp);
+
+    if (c.acctNum == 0)
+    {
+        printf("Account not found!\n");
+    }
+    else
+    {
+        printf("\nAccount No: %d\n", c.acctNum);
+        printf("Name: %s %s\n", c.firstName, c.lastName);
+        printf("Balance: %.2f\n", c.balance);
+    }
 }
