@@ -16,7 +16,8 @@ void displayAll(FILE *fp);
 void addAccount(FILE *fp);
 void updateAccount(FILE *fp);
 void deleteAccount(FILE *fp);
-void checkBalance(FILE *fp);   
+void checkBalance(FILE *fp);
+void withdrawAmount(FILE *fp);  
 
 int main()
 {
@@ -42,8 +43,9 @@ int main()
         printf("2. Add Account\n");
         printf("3. Update Account\n");
         printf("4. Delete Account\n");
-        printf("5. Check Balance\n");  
-        printf("6. Exit\n");           
+        printf("5. Check Balance\n");
+        printf("6. Withdraw Amount\n"); 
+        printf("7. Exit\n");            
         printf("Enter choice: ");
         scanf("%d", &choice);
 
@@ -62,9 +64,12 @@ int main()
             deleteAccount(fp);
             break;
         case 5:
-            checkBalance(fp);  
+            checkBalance(fp);
             break;
         case 6:
+            withdrawAmount(fp);   
+            break;
+        case 7:
             fclose(fp);
             exit(0);
         default:
@@ -205,4 +210,52 @@ void checkBalance(FILE *fp)
         printf("Name: %s %s\n", c.firstName, c.lastName);
         printf("Balance: %.2f\n", c.balance);
     }
+}
+
+void withdrawAmount(FILE *fp)
+{
+    struct clientData c;
+    int acc;
+    double amount;
+
+    printf("Enter account number: ");
+    scanf("%d", &acc);
+
+    if (acc < 1 || acc > MAX)
+    {
+        printf("Invalid account number!\n");
+        return;
+    }
+
+    fseek(fp, (acc - 1) * sizeof(struct clientData), SEEK_SET);
+    fread(&c, sizeof(struct clientData), 1, fp);
+
+    if (c.acctNum == 0)
+    {
+        printf("Account not found!\n");
+        return;
+    }
+
+    printf("Current balance: %.2f\n", c.balance);
+    printf("Enter amount to withdraw: ");
+    scanf("%lf", &amount);
+
+    if (amount <= 0)
+    {
+        printf("Invalid amount!\n");
+        return;
+    }
+
+    if (amount > c.balance)
+    {
+        printf("Insufficient balance!\n");
+        return;
+    }
+
+    c.balance -= amount;
+
+    fseek(fp, (acc - 1) * sizeof(struct clientData), SEEK_SET);
+    fwrite(&c, sizeof(struct clientData), 1, fp);
+
+    printf("Withdrawal successful!\n");
 }
